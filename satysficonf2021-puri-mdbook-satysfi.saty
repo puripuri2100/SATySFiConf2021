@@ -1,0 +1,244 @@
+@import: modest
+@require: simple-itemize/simple-itemize
+@require: image/image
+@require: annot
+@require: code
+@require: texlogo/texlogo
+
+
+@import: local
+
+SlydifiModest.document (|draft-mode = false|) '<
+  +make-title (|
+    title = {|mdbook-satysfiを作成しました|};
+    author = {|金子尚樹(\@puripuri2100)|};
+    date = {|2021/6/26|};
+  |);
+
+  +frame {自己紹介} <
+    +description {|
+      \item ?:({所属：}) ?* ?:(false) {開成学園開成高等学校}|
+      \item ?:({学年：}) ?* ?:(false) {高校三年生}|
+      \item ?:({GitHub：}) ?* ?:(false) {github.com/puripuri2100}|
+      \item ?:({e-mail：}) ?* ?:(false) {puripuri2100\@gmail.com}|
+      \item ?:({twitter：}) ?* ?:(false) {\@puripuri2100}|
+      \item ?:({使っている言語：}) ?* ?:(false) {\SATySFi;, Rust, OCamlなど。HaskellやRubyも少し書くだけならできます。}|
+      \item ?:({趣味：}) ?* ?:(false) {ペンシルパズル・ジャグリング・写真撮影・読書など。}
+    |}
+  >
+
+  +frame {自己紹介（\SATySFi;関係のこと）} <
+    +listing {|
+      \item {SATySFi Advent Calendar (2018 \| 2019 \| 2020)の主催}|
+      \item {satysfi-image・satysfi-rubyなどの便利パッケージの作成、satysfi-jsonなどのライブラリの作成、satysfi-class-exdesignなどのクラスファイル作成、xml2satyなどの変換ツール等、色々作っています。satysfi-baseのお手伝いもしています。}|
+      \item {\href(`https://puripuri2100.github.io/learn-satysfi/`){learn-satysfi}という\SATySFi;の解説サイトも作っています。お手伝いしてくださる方、絶賛お待ちしております。}|
+      \item {SATySFi Slackの管理をしています。まだ入っていない方はぜひ入ってみてください！気軽に質問できたり、逆に質問している人に回答したりできます。また、\SATySFi;関連の情報が多く回ってきます。}
+    |}
+  >
+
+  +frame {\SATySFi; Slackへの入り方} <
+    +center {\include-image (`fig/satysfi-slack-link.JPG`);}
+  >
+
+  +section {|mdbook-satysfiとは|} <
+    +frame {mdbook-satysfiの概要} <
+      +p{mdbookという「markdownファイル群からドキュメントを生成するツール」のプラグインで、「markdownファイル群から\SATySFi;ファイルを生成する」役割を果たします。}
+      +p{メリット：
+        \listing {|
+          \item {設定ファイルに一行書くだけで自動で走る}|
+          \item {ほとんどの文書の変換に対応できている}|
+          \item {markdownファイル内に書いたHTMLタグにも対応できる}
+        |}
+      }
+      +p{デメリット：特に無し}
+    >
+  >
+
+  +frame {mdbookとは} <
+    +p{文書構成が書かれた`SUMMARY.md`ファイルと原稿が書かれたmarkdownファイルからドキュメントを生成してくれるソフトウェアです。}
+    +p{`book.toml`というTOMLファイルで細かな設定を行うことが可能であったり、プラグインを簡単に入れることができたりと、使い勝手が良いです。}
+    +p{Rustで実装されており、rust-lang公式が作成・管理をしています。}
+    +p{「早くて使いやすく拡張のしやすいGitBook」という評価だと思われます。}
+    +p{前述のlearn-satysfiもmdbookを使っています。}
+  >
+
+  +frame {mdbookとは} <
+    +p{rust-lang公式が整備していることもあってRust関係のドキュメントで使われています。}
+    +center {\include-image (`fig/rustbook.JPG`);}
+  >
+
+  +frame {mdbookのプラグイン機能} <
+    +p{`mdbook-<name>`というソフトウェアを用意して`book.toml`に
+    \d-code(`[preprocessor.<name>]`);
+    や
+    \d-code(`[output.<name>]`);
+    と書いておくと、mdbookを起動したときに自動で実行されます。}
+    +p{中身のチェックや文字数カウントなどをするプリプロセッサの拡張機能と、中身を基に変換をしたりしてファイルを出力できる「代替バックエンド」の2種類があります。}
+    +p{mdbook-satysfiは「代替バックエンド」です。}
+  >
+
+  +frame {先行事例（mdbook-latex）} <
+    +p{Rustなどで\XeLaTeX;を再実装したTectonicをバックエンドとして使う。}
+    +p{機能がまだ弱いらしいので、\SATySFi;で置き換えてみたら便利になりそうな気がした。}
+    +center{\include-image(`fig/mdbook-latex-status.JPG`);}
+  >
+
+  +frame {リポジトリ} <
+    +p{\href(`https://github.com/puripuri2100/mdbook-satysfi`) {https://github.com/puripuri2100/mdbook-satysfi}にリポジトリがあります。}
+    +p{スターお願いします！}
+    +center{\include-image (`fig/mdbook-satysfi-repository.JPG`);}
+  >
+
+  +section {|mdbook-satysfiの使い方|} <
+    +frame {mdbookのインストール} <
+      +p{Rustのコンパイラとパッケージマネージャのcargoをインストールし、それを使ってインストールする方法が一番楽です。cargoをインストールすればRustのコンパイラも自動で入るのであまり考えなくて良い。}
+      +p{詳しくは\href(`https://www.rust-lang.org/tools/install`){https://www.rust-lang.org/tools/install}を参照のこと。}
+      +p{cargoをインストールしたら\d-code(`cargo install mdbook`);を実行するだけで良い。}
+    >
+    +frame {mdbook-satysfiのインストール} <
+      +p{mdbook-satysfiは`crates.io`に登録済みなのでcargoを使ってインストールすることが出来る。}
+      +code(`cargo install mdbook-satysfi`);
+      +p{でインストールが終了する。}
+    >
+
+    +frame {mdbook-satysfiの呼び出し} <
+      +p{`book.toml`という設定ファイルに
+      \d-code(`[output.satysfi]`);
+      という一行を入れるだけで良い。}
+      +p{\SATySFi;はjpegファイルしか対応していない為、埋め込まれているSVGファイルやpngファイルなどは全て変換してリンクを貼りなおす必要がある。}
+      +p{自動で変換され、特に設定が無ければ`book/satysfi/main.saty`というファイルに出力される。}
+    >
+
+    +frame {PDFの自動ビルド} <
+      +code(`
+[output.satysfi]
+  pdf = true
+      `);
+      +p{というように、`pdf = true`という一行を入れると裏で\SATySFi;が回って自動でPDFファイルが出力される。}
+      +p{その他詳しい設定は\href(`https://puripuri2100.github.io/mdbook-satysfi/ja/`){https://puripuri2100.github.io/mdbook-satysfi/ja/}を読んでください。}
+    >
+
+    +frame {mdbook-satysfiの拡張機能} <
+      +p{以下の項目について自由に設定できる
+        \listing{|
+          \item {HTMLタグを変換する際のコマンド名と引数の設定}|
+          \item {パッケージの追加読み込み}|
+          \item {クラスファイルの変更}
+        |}
+      詳しくはドキュメント（\href(`https://puripuri2100.github.io/mdbook-satysfi/ja/`){https://puripuri2100.github.io/mdbook-satysfi/ja/}）を読んでください。}
+      +p{必要な関数とコマンドを定義すれば自分の好みのデザインのクラスファイルを使うことができるため、多くのデザインが出てくると嬉しいです。}
+    >
+  >
+
+  +section {|mdbook-satysfiの|作成方法について|} <
+    +frame {データの取得} <
+      +p{`stdin`からJSON形式の文字列で設定や本文のデータが与えられ、それをmdbookライブラリが提供している`RenderContext::from_json`という関数で処理するとデータ構造を得ることができます。}
+      +p{得られるデータの例：
+        \listing{|
+          \item {`SUMMARY.md`の中の文章構造とそれに対応するファイルの中身}|
+          \item {タイトルや著者名などのデータ}|
+          \item {ファイルのあるパス}
+        |}
+      }
+    >
+
+    +frame {テキストを出力したい形式にする} <
+      +p{markdownテキストを与えられるので、それを解析します。}
+      +p{解析には`pulldown_cmark`というライブラリを使用しました。}
+      +p{mdbook本体も使用しており、高速なのでこれ以外選択肢は無いと言っても良いです。}
+      +p{markdownを解析した結果を「開始タグ」・「テキスト」・「終了タグ」に分けて順に渡してくれます。木構造のような再帰構造ではないので好みはわかれるかもしれません。}
+    >
+
+    +frame {`pulldown_cmark`の罠} <
+      +p{\emph{markdownに埋め込まれたHTMLコードの解析がとてつもなく大変}になります。}
+      +code(`
+<!--
+  <p> hoge
+-->
+
+<span style="background-color: #0099FF"
+  class="foo">fuga</span>
+      `);
+      +p{HTMLコードかどうかを「1行単位」でしか教えてくれないため、コメントへの対応や途中で改行されているHTMLタグへの対応が大変（場合分けが複雑）}
+    >
+
+    +frame {`pulldown_cmark`の罠を避ける方法} <
+      +p{\emph{markdownに埋め込まれたHTMLコードを含めて全てのテキストをHTMLコードに変換し、変換後のHTMLテキストを解析する！}}
+      +p{コメントの対処や変なタグへの対処が楽になります。}
+      +p{`pulldown_cmark`ライブラリは標準でHTMLへの変換関数を提供してくれており、変換方法に手を入れることも出来るため、高速に簡単に変換できます。}
+      +p{HTMLコードの解析には`html_parser`ライブラリを使用。PEGを使用したパーサーで、HTMLコードを木構造に変換してくれるので、再帰関数を使用してHTMLタグを\SATySFi;コードに変換します。}
+    >
+
+    +frame {mdbook独自拡張への対応} <
+      +p{ソースコードなどの外部ファイルの中身の挿入に関してmdbook独自のmarkdown拡張があるため、それに対応する必要がある。}
+      +p{`{{#include file.rs}}`のようにすると`file.rs`を読み込めるような拡張です。行数指定ができたりします。}
+      +p{正規表現や手書きパーサーを駆使して解析するしかないので、公式で関数の提供が欲しいところですね。}
+    >
+  >
+
+  +section {|class-mdbook-satysfi|について|} <
+    +frame {class-mdbook-satysfiとは} <
+      +p{mdbook-satysfiで出力されたファイルで標準で読み込むクラスファイルです。}
+      +p{satyrographos-repoに登録してあるので、
+      \d-code(`
+opam update
+opam install satysfi-class-mdbook-satysfi
+satyrographos install
+      `);
+      をすることでインストールされます。}
+      +p{デモファイルは\href(`https://satyrographos-packages.netlify.app/docs/class-mdbook-satysfi-doc/class-mdbook-satysfi-demo.pdf`){https://satyrographos-packages.netlify.app/docs/class-mdbook-satysfi-doc/class-mdbook-satysfi-demo.pdf}をご覧ください。}
+    >
+
+    +frame {定義したコマンド} <
+      +p{目次用の`+Chapter`・`+Separator`・`+PartTitle`といったコマンド、強調用の`\strong`・`\emph`コマンド、表用の`+table`・`+thead`・`+tr`・`\th`コマンドなど、HTMLタグに対応するコマンドを定義しています。}
+      +p{markdown表記法内では書くことができない`ruby`タグや`sup`タグなどに対応する`\ruby`コマンドや`\sup`コマンドもいくつか提供しています。}
+      +p{1000行程度で実装できるほか、ドキュメントにも「定義しなければいけないコマンド」の一覧を載せていますので、デザインの違うクラスファイルを作ってくださる方をお待ちしております！}
+    >
+
+    +frame {出力されたPDFの見た目} <
+      +p{目次からリンクを貼り、PDFしおりも自動で付くようになっています。}
+      +center{\include-image (`fig/demo1.JPG`);}
+    >
+
+    +frame {出力されたPDFの見た目} <
+      +center{\include-image (`fig/demo2.JPG`);}
+    >
+
+    +frame {出力されたPDFの見た目} <
+      +center{\include-image ?:(200mm) (`fig/demo3.JPG`);}
+    >
+
+    +frame {出力されたPDFの見た目} <
+      +center{\include-image ?:(200mm) (`fig/demo4.JPG`);}
+    >
+
+    +frame {出力されたPDFの見た目} <
+      +center{\include-image ?:(180mm) (`fig/demo5.JPG`);}
+    >
+
+    +frame {依存したライブラリ} <
+      +description {|
+        \item ?:({satysfi-base}) ?* ?:(false) {表や箇条書きの実装に使いました}|
+        \item ?:({satysfi-easytable}) ?* ?:(false) {表の実装に使いました}|
+        \item ?:({satysfi-uline}) ?* ?:(false) {`\stroke`コマンドの実装に使いました}|
+        \item ?:({satysfi-ruby}) ?* ?:(false) {`\ruby`コマンドの実装に使いました}|
+        \item ?:({satysfi-quotation}) ?* ?:(false) {`+block-quote`コマンドの実装に使いました}|
+        \item ?:({satysfi-fonts-noto-\*}) ?* ?:(false) {本文のフォントに使いました}|
+        \item ?:({satysfi-fonts-inconsolata}) ?* ?:(false) {コード部分のフォントに使いました}
+      |}
+      +p{作者の方々ありがとうございます。}
+    >
+  >
+
+  +section {|まとめ|} <
+    +frame {まとめ} <
+      +listing {|
+        \item {mdbook-satysfiというmdbookの拡張機能を作りました。}|
+        \item {HTMLコードを一旦経由することでHTMLタグへの対応を行いました。}|
+        \item {mdbookの独自拡張への対応が大変でした。}|
+        \item {class-mdbook-satysfiという専用のクラスファイルも用意しました。}|
+        \item {将来はlearn-satysfiなどにも使いたいですね。}
+      |}
+    >
+  >
+>

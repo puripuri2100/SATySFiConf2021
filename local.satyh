@@ -1,0 +1,3 @@
+let-block ctx +center it =
+  let ib = read-inline ctx it in
+  line-break true true ctx (inline-fil ++ ib ++ inline-fil)

@@ -1,0 +1,321 @@
+@require: option
+@require: class-slydifi/slydifi
+@require: class-slydifi/functions/color
+@require: class-slydifi/functions/footnote
+@require: class-slydifi/functions/overlay
+
+module SlydifiModest : sig
+
+
+  val cfg-paper: (|
+    width : length;
+    height : length;
+  |)
+
+  val cfg-text: (|
+    normal : config-font;
+    emph : config-font;
+    bf: config-font;
+    frame-title : config-font;
+    header : config-font;
+    footer : config-font;
+    slide-title : config-font;
+    slide-author : config-font;
+    slide-date : config-font;
+    section-title : config-font;
+    footnote : config-font;
+  |)
+
+  val cfg-color: (|
+    bg : color;
+    fg : color;
+    main-grid : color;
+    sub-grid : color;
+  |)
+
+  val cfg-spacing : (|
+    text-width : length;
+    text-height : length;
+    text-horizontal-margin : length;
+    text-vertical-margin : length;
+    header-basepos : length;
+    footer-basepos : length;
+    main-grid : length;
+    sub-grid : length;
+    bg-gr-start-point : length;
+  |)
+
+
+  val document: 'a -> block-text -> document
+    constraint 'a :: (|
+      draft-mode: bool;
+    |)
+
+  direct +make-title : ['a] block-cmd
+    constraint 'a :: (|
+      title: inline-text list;
+      author: inline-text list;
+      date: inline-text list;
+    |)
+  direct +section : [inline-text list; block-text] block-cmd
+  direct +frame : [inline-text; block-text] block-cmd
+  %direct +frame-nt : [block-text] block-cmd
+  %direct +multiframe : [int; inline-text; block-text] block-cmd
+
+
+  direct \emph : [(int -> bool)?; inline-text] inline-cmd
+  direct \textbf : [(int -> bool)?; inline-text] inline-cmd
+
+  direct \footnote : [inline-text] inline-cmd
+
+end = struct
+
+
+let cfg-paper = (|
+    width = 25.4cm;
+    height = 14.29cm;
+  |)
+
+
+
+let cfg-font-normal = (|
+    size = 20pt;
+    font-latin = (`lmsans`, 1.0, 0.0);
+    font-cjk = (`ipaexg`, 1.0, 0.0);
+    par-margin-ratio = (0.65, 0.65);
+    leading-ratio = 1.4;
+  |)
+
+
+let cfg-font-emph = (|
+    cfg-font-normal
+    with
+    font-latin = (`lmsans`, 1.0, 0.0);
+  |)
+
+
+let cfg-font-bf = (|
+    cfg-font-normal
+    with
+    font-latin = (`Junicode-b`, 1.0, 0.0);
+  |)
+
+
+let cfg-color = (|
+    bg = SlydifiColor.white;
+    fg = SlydifiColor.black;
+    main-grid = SlydifiColor.black;
+    sub-grid = SlydifiColor.gray 0.5;
+  |)
+
+
+let cfg-text = (|
+    normal = cfg-font-normal;
+    emph = cfg-font-emph;
+    bf = cfg-font-bf;
+    frame-title = (|cfg-font-emph with size = 28pt|);
+    header = (|cfg-font-normal with size = 12pt|);
+    footer = (|cfg-font-normal with size = 12pt|);
+    slide-title = (|cfg-font-emph with size = 32pt|);
+    slide-author = (|cfg-font-emph with size = 23pt|);
+    slide-date = (|cfg-font-emph with size = 23pt|);
+    section-title = (|cfg-font-emph with size = 30pt|);
+    footnote = (|cfg-font-emph with size = 12pt|);
+  |)
+
+
+let cfg-spacing = (|
+    text-width = cfg-paper#width -' (30pt *' 2.0);
+    text-height = cfg-paper#height -' (15pt *' 2.0);
+    text-horizontal-margin = 30pt;
+    text-vertical-margin = 10pt;
+    header-basepos = 3pt;
+    footer-basepos = 25pt;
+    main-grid = 50pt;
+    sub-grid = 10pt;
+    bg-gr-start-point = 0pt;
+  |)
+
+
+let-mutable is-first-page <- true
+let-mutable is-draft-mode <- false
+
+
+let relwid relx = cfg-paper#width *' relx
+let relht rely = cfg-paper#height *' rely
+
+let document record inner =
+  let () = is-draft-mode <- record#draft-mode in
+  let header _ = block-nil in
+  let footer page-info =
+    let ctx =
+      SlydifiScheme.get-standard-context cfg-text cfg-color cfg-paper#width
+      |> SlydifiScheme.set-font-config cfg-text#footer
+    in
+    let page-number-it = page-info#page-number |> arabic |> embed-string in
+    let count-it =
+      match get-cross-reference `pagecount` with
+      | None -> {??}
+      | Some(i) -> embed-string i
+    in
+    line-break true true ctx
+      (inline-fil ++ (read-inline ctx {#page-number-it;/#count-it;}) ++ inline-skip 20pt)
+  in
+  SlydifiScheme.document-scheme cfg-paper cfg-text cfg-color cfg-spacing header footer inner
+
+
+let-block ctx +make-title record =
+  let title-xmin = relwid 0.1 in
+  let title-ymin = relht 0.5 in
+  let bg-title =
+    stroke 2.5pt (RGB(91.0 /. 256.0, 12.0 /. 256.0, 8.0 /. 256.0)) (Gr.line (relwid 0.1, relht 0.45) (relwid 0.9, relht 0.45))
+  in
+  let title-gr =
+    let ctx =
+      ctx |> SlydifiScheme.set-font-config cfg-text#slide-title
+    in
+    let titles ctx =
+      record#title |> List.map (fun it -> (
+        line-break true true ctx (read-inline ctx it ++ inline-fil)
+      ))
+    in
+    let title = embed-block-top ctx (relwid 0.8)
+      (fun ctx -> titles ctx |> List.fold-left (+++) block-nil)
+    in
+    SlydifiScheme.put-text (title-xmin, title-ymin) (0., 0.) title
+  in
+  let author-gr =
+    let ctx =
+      ctx |> SlydifiScheme.set-font-config cfg-text#slide-author
+    in
+    let author =
+      record#author
+        |> List.map (fun it -> read-inline ctx it)
+        |> List.fold-lefti (fun i ib1 ib2 -> (
+          if i == 0 then
+            ib2
+          else
+            ib1 ++ (read-inline ctx {,}) ++ inline-skip 20pt ++ ib2
+        )) inline-nil
+    in
+    SlydifiScheme.put-text (title-xmin, relht 0.35) (0., 0.) author
+  in
+  let date-gr =
+    let ctx =
+      ctx |> SlydifiScheme.set-font-config cfg-text#slide-date
+    in
+    let date =
+      record#date
+        |> List.map (fun it -> read-inline ctx it)
+        |> List.fold-lefti (fun i ib1 ib2 -> (
+          if i == 0 then
+            ib2
+          else
+            ib1 ++ (read-inline ctx {,}) ++ inline-skip 20pt ++ ib2
+        )) inline-nil
+    in
+    SlydifiScheme.put-text (title-xmin, relht 0.25) (0., 0.) date
+  in
+  let bg-graphics =
+    [bg-title; title-gr; author-gr; date-gr;]
+  in
+  SlydifiScheme.frame-scheme cfg-paper cfg-color cfg-spacing is-first-page is-draft-mode bg-graphics ctx block-nil
+
+
+let-block ctx +section titles frames =
+  let bg-graphics =
+    let back-color =
+      fill (SlydifiColor.html-color 0xC4DFE6)
+        (Gr.rectangle (relwid 0.0, relht 0.0) (relwid 1.0, relht 1.0))
+    in
+    let title-gr =
+      let ctx =
+        ctx |> SlydifiScheme.set-font-config cfg-text#section-title
+      in
+      let titles ctx =
+        titles |> List.map (fun it -> (
+          line-break true true ctx (inline-fil ++ read-inline ctx it ++ inline-fil)
+        ))
+      in
+      let title = embed-block-top ctx (relwid 0.6)
+        (fun ctx -> titles ctx |> List.fold-left (+++) block-nil)
+      in
+      SlydifiScheme.put-text (relwid 0.2, relht 0.5) (0., 0.5) title
+    in
+    [back-color; title-gr]
+  in
+  let section-frame =
+    SlydifiScheme.frame-scheme cfg-paper cfg-color cfg-spacing is-first-page is-draft-mode bg-graphics ctx block-nil
+  in
+  section-frame +++ (read-block ctx frames)
+
+
+let-block ctx +frame title inner =
+  let bg-graphics = [] in
+  let title-bb =
+    let deco (x, y) w h d =
+      let path =
+        let xL = 0pt in
+        let yB = y in
+        let xR = cfg-paper#width in
+        let yT = cfg-paper#height in
+        Gr.rectangle (xL, yT) (xR, yB)
+      in
+      [fill (SlydifiColor.html-color 0x08575B) path]
+    in
+    let ctx-title = ctx
+      |> SlydifiScheme.set-font-config cfg-text#frame-title
+      |> set-text-color SlydifiColor.white
+    in
+    let ib-title = read-inline ctx-title title in
+    block-frame-breakable ctx-title
+      (0pt, 0pt, 5pt, 15pt)
+      (deco, deco, deco, deco)
+      (fun ctx -> line-break true true ctx (ib-title ++ inline-fil))
+  in
+  let inner-bb = read-block ctx inner in
+  SlydifiScheme.frame-scheme cfg-paper cfg-color cfg-spacing is-first-page is-draft-mode bg-graphics ctx (title-bb +++ inner-bb)
+
+
+let-inline ctx \emph ?:dcf it =
+  let dcf = Option.from (fun _ -> true) dcf in
+  let ctx = SlydifiOverlay.select dcf
+    (
+      ctx |> SlydifiScheme.set-fonts cfg-text#emph
+          |> set-text-color Color.red
+    ) ctx
+  in
+  read-inline ctx it
+
+
+let-inline ctx \textbf ?:dcf it =
+  let dcf = Option.from (fun _ -> true) dcf in
+  let ctx = SlydifiOverlay.select dcf (ctx |> SlydifiScheme.set-fonts cfg-text#bf) ctx in
+  read-inline ctx it
+
+
+
+let-inline ctx \footnote it =
+  let size = get-font-size ctx in
+  let ibf num =
+    let num-it = num |> arabic |> embed-string in
+    let ctx =
+      ctx |> set-font-size (size *' 0.75)
+          |> set-manual-rising (size *' 0.25)
+    in
+    read-inline ctx {\*#num-it;}
+  in
+  let bbf num =
+    let num-it = num |> arabic |> embed-string in
+    let ctx =
+      ctx |> set-font-size (cfg-text#footnote#size *' 0.8)
+          |> set-paragraph-margin (cfg-text#footnote#size *' 0.5) (cfg-text#footnote#size *' 0.5)
+    in
+    let ib = read-inline ctx {#num-it; #it;} ++ inline-fil in
+    line-break false false ctx ib
+  in
+  FootnoteScheme.main ctx None ibf bbf
+
+
+end
+
