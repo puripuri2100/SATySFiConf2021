@@ -1,3 +1,6 @@
+
+% Copyright (c) 2021 Naoki Kaneko and Mogami Shinichi
+
 @require: option
 @require: class-slydifi/slydifi
 @require: class-slydifi/functions/color
